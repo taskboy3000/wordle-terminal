@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
-use strict;
-use warnings;
+use Modern::Perl;
+
+use FindBin;
 
 sub main {
     my ($pattern, $exclude, $required) = @ARGV;
@@ -20,7 +21,24 @@ sub main {
         @required = split //, $required;
     }
 
-    open my $wordsFH, "<", "/Users/jjohn/src/wordle/words" or die("words: $!");
+    my @searchOrder = (
+                       "/usr/share/dict/words",
+                       "$FindBin::Bin/5-letter-words.txt",
+                      );
+
+    my $dictionaryFile;
+    for my $searchOrder (@searchOrder) {
+        if (-e $searchOrder) {
+            $dictionaryFile = $searchOrder;
+            last;
+        }
+    }
+
+    if (!-e $dictionaryFile) {
+        die("Cannot find dictionary file.\n");
+    }
+
+    open my $wordsFH, "<", $dictionaryFile or die("words: $!");
 
     my %suggestions;
   NEXT_WORD:
